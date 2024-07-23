@@ -9,7 +9,7 @@ from EmotionDetection.emotion_detection import emotion_detector
 app = Flask(__name__)
 
 @app.route("/emotionDetector")
-def emotionDetector():
+def emotion_detector_api():
     ''' This code receives the text from the HTML interface and 
         runs emotion detection over it using emotion_detector()
         function. The output returned shows the score of emotions and the dominant emotion.
@@ -25,12 +25,10 @@ def emotionDetector():
     if result['dominant_emotion'] is None:
         return "Invalid text! Please try again!"
 
-    return f"""For the given statement, the system response is 
-        'anger': {result['anger']}, 
-        'disgust': {result['disgust']},
-        'fear': {result['fear']},
-        'joy': {result['joy']} 
-        and 'sadness': {result['sadness']}. 
+    return f"""For the given statement, the system response is
+         'anger': {result['anger']}, 'disgust': {result['disgust']},
+         'fear': {result['fear']},'joy': {result['joy']},
+          and 'sadness': {result['sadness']}.
         
         The dominant emotion is {result['dominant_emotion']}."""
 
