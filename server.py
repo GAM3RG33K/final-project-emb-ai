@@ -17,13 +17,13 @@ def emotionDetector():
 
     text_to_analyze = request.args.get("textToAnalyze")
 
-    if not text_to_analyze:
-        return {"error": "No text provided to process"}, 400
-
     result = emotion_detector(text_to_analyze)
 
-    if 'error_code' in result:
-        return {"error": f"The given text is unprocessed due to server error = {result['error_code']}"}, 500
+    if 'error_message' in result:
+        return f"{result['error_message']}"
+
+    if result['dominant_emotion'] is None:
+        return "Invalid text! Please try again!"
 
     return f"""For the given statement, the system response is 
         'anger': {result['anger']}, 

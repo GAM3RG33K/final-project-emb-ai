@@ -22,11 +22,12 @@ result = emotion_detection.emotion_detector("This is some example text.")
 default_result = emotion_detection.emotion_detector()
 """
 
+from typing import Dict
 import requests
 
 API = "https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict"
 
-def format_response(data):
+def format_response(data) -> Dict[str, str]:
     """This function formats the response from the API into a dictionary.
 
     Args:
@@ -52,8 +53,34 @@ def format_response(data):
         'sadness': sadness_score,
         'dominant_emotion': dominant_emotion
     }
+    
+def error_response(response) -> Dict[str, str]:
+    """This function formats the error response from the API into a dictionary.
 
-def emotion_detector(input_text):
+    Args:
+        data (dict): The response from the API.
+
+    Returns:
+        dict: A dictionary containing the emotion scores and dominant emotion for the given text.
+    """
+
+    if response.status_code != 200:            
+        if response.status_code == 400:
+            return {
+                'anger': None,
+                'disgust': None,
+                'fear': None,
+                'joy': None,
+                'sadness': None,
+                'dominant_emotion': None
+            }
+        else:
+            return {
+                'error_message':  f'Something went wrong! Error={response.status_code}'
+            }
+    return None
+
+def emotion_detector(input_text) -> Dict[str, str]:
     """emotion detection of the provided text 
 
     URL: f'{API}'
@@ -64,18 +91,14 @@ def emotion_detector(input_text):
         text: <string>
     """
 
-    if not input_text:
-        return {"error": "blank input provided"}, 403
-
     url = API
     myobj = { "raw_document": { "text": input_text } }
     header = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
     response = requests.post(url, json = myobj, headers=header, timeout=10)
 
-    if response.status_code != 200:
-        return {
-            'error_code': response.status_code
-        }
+    if error_response(response):
+        return error_response(response)
+
     data = response.json()['emotionPredictions'][0]
 
     result =  format_response(data['emotion'])
