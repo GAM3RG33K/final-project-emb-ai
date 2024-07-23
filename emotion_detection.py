@@ -1,0 +1,55 @@
+"""
+This module performs emotion detection on a given text using Watson's BERT model.
+
+The `emotion_detector` function takes in a string and 
+    sends a POST request to the specified API URL. 
+The response is then processed to extract relevant data & returned as json.
+
+The `API_URL` constant holds the URL endpoint for
+ the Watson BERT model emotion analysis service.
+
+Dependencies:
+- requests: To make HTTP POST requests to the API.
+- json: To handle JSON data serialization and deserialization.
+
+Example Usage:
+```python
+import emotion_detection
+
+# Analyze a custom text
+result = emotion_detection.emotion_detector("This is some example text.")
+
+# Analyze default text
+default_result = emotion_detection.emotion_detector()
+"""
+
+import json
+import requests
+
+API_URL = """https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict"""
+
+
+def emotion_detector(input_text):
+    """emotion detection of the provided text 
+
+    URL: f'{API_URL}'
+    Headers: {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
+    Input json: { "raw_document": { "text": input_text } }
+
+    Returns:
+        text: <string>
+    """
+
+    if not input_text:
+        return {"error": "blank input provided"}, 403
+
+    print(f'Processing input text for emotions: {input_text}')
+
+    url = API_URL
+    myobj = { "raw_document": { "text": input_text } }
+    header = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
+    response = requests.post(url, json = myobj, headers=header, timeout=10)
+
+    print(f"emotion check response: {response.json()}, {response.status_code}")
+    
+    return response
