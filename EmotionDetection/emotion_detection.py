@@ -10,7 +10,6 @@ The `API_URL` constant holds the URL endpoint for
 
 Dependencies:
 - requests: To make HTTP POST requests to the API.
-- json: To handle JSON data serialization and deserialization.
 
 Example Usage:
 ```python
@@ -23,20 +22,26 @@ result = emotion_detection.emotion_detector("This is some example text.")
 default_result = emotion_detection.emotion_detector()
 """
 
-import json
 import requests
 
-API_URL = """https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict"""
-
+API = "https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict"
 
 def format_response(data):
-        
+    """This function formats the response from the API into a dictionary.
+
+    Args:
+        data (dict): The response from the API.
+
+    Returns:
+        dict: A dictionary containing the emotion scores and dominant emotion for the given text.
+    """
+
     anger_score = float(data['anger'])
     disgust_score = float(data['disgust'])
     fear_score = float(data['fear'])
     joy_score = float(data['joy'])
     sadness_score = float(data['sadness'])
-    
+
     dominant_emotion = max(data, key=data.get)
 
     return {
@@ -48,11 +53,10 @@ def format_response(data):
         'dominant_emotion': dominant_emotion
     }
 
-
 def emotion_detector(input_text):
     """emotion detection of the provided text 
 
-    URL: f'{API_URL}'
+    URL: f'{API}'
     Headers: {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
     Input json: { "raw_document": { "text": input_text } }
 
@@ -63,16 +67,12 @@ def emotion_detector(input_text):
     if not input_text:
         return {"error": "blank input provided"}, 403
 
-    print(f'Processing input text for emotions: {input_text}')
-
-    url = API_URL
+    url = API
     myobj = { "raw_document": { "text": input_text } }
     header = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
     response = requests.post(url, json = myobj, headers=header, timeout=10)
 
-    print(f"emotion check response: \n{response.json()} \n\nstatus: {response.status_code}")
-    
     data = response.json()['emotionPredictions'][0]
-    
+
     result =  format_response(data['emotion'])
     return result
